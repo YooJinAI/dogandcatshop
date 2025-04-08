@@ -1,0 +1,55 @@
+{
+  "products": [
+    {
+      "id": "dog_food_1",
+      "name": "프리미엄 강아지 사료",
+      "price": 45000,
+      "category": "사료",
+      "description": "영양 밸런스가 우수한 프리미엄 사료입니다. 강아지의 건강한 성장을 위한 필수 영양소가 풍부하게 함유되어 있습니다.",
+      "image": "assets/강아지 사료1.png"
+    },
+    {
+      "id": "cat_food_1",
+      "name": "고양이 프리미엄 사료",
+      "price": 55000,
+      "category": "사료",
+      "description": "엄선된 원료로 만든 고양이 전용 사료입니다. 피부와 모질 관리에 도움이 되는 영양소가 포함되어 있습니다.",
+      "image": "assets/고양이 사료1.png"
+    },
+    {
+      "id": "dog_snack_1",
+      "name": "강아지 덴탈껌",
+      "price": 12000,
+      "category": "간식",
+      "description": "치아 건강에 좋은 덴탈껌입니다. 자연스러운 치석 제거 효과가 있습니다.",
+      "image": "assets/dog_snack1.png"
+    },
+    {
+      "id": "cat_snack_1",
+      "name": "고양이 연어 트릿",
+      "price": 8000,
+      "category": "간식",
+      "description": "신선한 연어로 만든 수제 간식입니다. 오메가3가 풍부하여 모질 개선에 도움됩니다.",
+      "image": "assets/고양이간식1.png"
+    },
+    {
+      "id": "dog_clothes_1",
+      "name": "강아지 겨울 패딩",
+      "price": 28000,
+      "category": "옷",
+      "description": "추운 겨울을 따뜻하게 보낼 수 있는 패딩입니다. 가볍고 보온성이 우수합니다.",
+      "image": "assets/강아지패딩1.png"
+    },
+    {
+      "id": "cat_clothes_1",
+      "name": "고양이 티셔츠",
+      "price": 15000,
+      "category": "옷",
+      "description": "부드러운 면소재로 제작된 고양이용 티셔츠입니다. 피부 자극이 적고 착용감이 좋습니다.",
+      "image": "assets/고양이옷1.png"
+    }
+  ]
+}
+
+
+

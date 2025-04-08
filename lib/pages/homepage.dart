@@ -17,12 +17,32 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // 현재 선택된 카테고리
   String selectedCategory = CategoryUtils.categories[0];
+  // 필터링에 사용될 카테고리
   String? filterCategory;
+  // 마지막 탭 시간을 저장하는 변수 (더블 탭 감지용)
   DateTime? lastTapTime;
 
+  @override
+  void initState() {
+    super.initState();
+    // 위젯이 처음 생성될 때 샘플 상품 데이터 로드
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialData();
+    });
+  }
+
+  // 초기 상품 데이터 로드 함수
+  Future<void> _loadInitialData() async {
+    final provider = Provider.of<ProductProvider>(context, listen: false);
+    await provider.loadSampleProducts();
+  }
+
+  // 카테고리 버튼 탭 처리 함수
   void handleCategoryTap(String category) {
     final now = DateTime.now();
+    // 더블 탭 감지 (500ms 이내에 같은 카테고리를 두 번 탭)
     if (lastTapTime != null &&
         now.difference(lastTapTime!) < const Duration(milliseconds: 500) &&
         category == selectedCategory) {
@@ -40,6 +60,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // 선택된 카테고리에 따라 상품 목록 필터링
   List<Product> getFilteredProducts(List<Product> products) {
     if (filterCategory == null) {
       return products;
@@ -52,6 +73,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // 상단 앱바 (장바구니 아이콘 포함)
       appBar: HomeAppBar(
         actions: [
           IconButton(
@@ -71,11 +93,13 @@ class _HomePageState extends State<HomePage> {
         color: Colors.white,
         child: Consumer<ProductProvider>(
           builder: (context, productProvider, _) {
+            // 필터링된 상품 목록 가져오기
             final filteredProducts =
                 getFilteredProducts(productProvider.products);
 
             return Column(
               children: [
+                // 카테고리 선택 영역
                 Container(
                   height: 120,
                   padding: const EdgeInsets.symmetric(vertical: 20),
@@ -96,6 +120,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
+                // 상품 목록 그리드
                 Expanded(
                   child: filteredProducts.isEmpty
                       ? const Center(
@@ -117,6 +142,7 @@ class _HomePageState extends State<HomePage> {
                               elevation: 2,
                               child: InkWell(
                                 onTap: () {
+                                  // 상품 상세 페이지로 이동
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -132,6 +158,7 @@ class _HomePageState extends State<HomePage> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
+                                        // 상품 이미지
                                         Expanded(
                                           child: Container(
                                             width: double.infinity,
@@ -142,12 +169,13 @@ class _HomePageState extends State<HomePage> {
                                                 top: Radius.circular(4),
                                               ),
                                             ),
-                                            child: Image.file(
+                                            child: Image.asset(
                                               product.image,
                                               fit: BoxFit.cover,
                                             ),
                                           ),
                                         ),
+                                        // 상품 정보 (이름, 가격, 카테고리)
                                         Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: SingleChildScrollView(
@@ -172,7 +200,7 @@ class _HomePageState extends State<HomePage> {
                                                           .spaceBetween,
                                                   children: [
                                                     Text(
-                                                      '${product.price}원',
+                                                      '${product.price.toStringAsFixed(0)}원',
                                                       style: const TextStyle(
                                                         fontSize: 12,
                                                         color: Colors.green,
@@ -195,11 +223,13 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       ],
                                     ),
+                                    // 상품 삭제 버튼
                                     Positioned(
                                       top: 4,
                                       right: 4,
                                       child: GestureDetector(
                                         onTap: () {
+                                          // 삭제 확인 다이얼로그 표시
                                           showDialog(
                                             context: context,
                                             builder: (context) => AlertDialog(

@@ -1,3 +1,5 @@
+// 상품 상세 페이지
+// 선택한 상품의 상세 정보를 보여주고 장바구니에 추가하거나 바로 구매할 수 있는 화면
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/product.dart';
@@ -22,101 +24,105 @@ class ProductDetailPage extends StatefulWidget {
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int quantity = 1;
 
-  Widget _buildProductImage(Product product) {
-    return SizedBox(
-      width: double.infinity,
-      height: 300,
-      child: Image.file(
-        product.image,
-        fit: BoxFit.cover,
-      ),
-    );
-  }
+  // 상품 이미지를 표시하는 위젯
+  Widget _buildProductImage(Product product) => SizedBox(
+        width: double.infinity,
+        height: 300,
+        child: Image.asset(
+          product.image,
+          fit: BoxFit.cover,
+        ),
+      );
 
-  Widget _buildProductInfo(Product product) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product.name,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+  // 상품 정보를 표시하는 위젯
+  Widget _buildProductInfo(Product product) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 상품명과 카테고리, 가격을 표시하는 행
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 상품명
+                      Text(
+                        product.name,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    CategoryButton(
-                      title: product.category,
-                      isSelected: true,
-                      onTap: () {},
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      // 카테고리 버튼
+                      CategoryButton(
+                        title: product.category,
+                        isSelected: true,
+                        onTap: () {},
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Text(
-                '₩${product.price.toString()}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  color: Colors.green,
-                  fontWeight: FontWeight.bold,
+                // 상품 가격
+                Text(
+                  '₩${product.price}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            '상품 설명',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+              ],
             ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            width: double.infinity,
-            height: 150,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Colors.grey[300]!,
-                width: 1,
+            const SizedBox(height: 24),
+            // 상품 설명 섹션
+            const Text(
+              '상품 설명',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            child: SingleChildScrollView(
-              child: Text(
-                product.description,
-                style: const TextStyle(
-                  fontSize: 14,
+            const SizedBox(height: 8),
+            // 상품 설명 내용
+            Container(
+              width: double.infinity,
+              height: 150,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Colors.grey[300]!,
+                  width: 1,
+                ),
+              ),
+              child: SingleChildScrollView(
+                child: Text(
+                  product.description,
+                  style: const TextStyle(fontSize: 14),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
+            const SizedBox(height: 24),
+          ],
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
+    // ProductProvider를 통해 상품 정보 가져오기
     final productProvider = Provider.of<ProductProvider>(context);
-    final product = productProvider.findById(widget.id);
+    final product = productProvider.getProductById(widget.id);
 
+    // 상품이 없는 경우 메시지 표시
     if (product == null) {
-      return Scaffold(
-        appBar: const PageAppBar(),
-        body: const Center(
+      return const Scaffold(
+        appBar: PageAppBar(),
+        body: Center(
           child: Text('상품을 찾을 수 없습니다.'),
         ),
       );
@@ -128,6 +134,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       body: SafeArea(
         child: Column(
           children: [
+            // 상품 이미지와 정보를 스크롤 가능한 영역에 표시
             Expanded(
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -140,18 +147,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 ),
               ),
             ),
+            // 하단 버튼 영역
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
+                  // 장바구니에 담기 버튼
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        final cartProvider = Provider.of<CartProvider>(
-                          context,
-                          listen: false,
-                        );
-                        cartProvider.addItem(product);
+                        Provider.of<CartProvider>(context, listen: false)
+                            .addItem(product);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('장바구니에 추가되었습니다'),
@@ -166,17 +172,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     ),
                   ),
                   const SizedBox(width: 16),
+                  // 바로 구매하기 버튼
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
+                        final cartProvider =
+                            Provider.of<CartProvider>(context, listen: false);
+                        cartProvider.addItem(product);
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => CheckoutPage(
-                              name: product.name,
-                              price: product.price.toDouble(),
-                              image: product.image,
-                            ),
+                            builder: (context) => const CheckoutPage(),
                           ),
                         );
                       },

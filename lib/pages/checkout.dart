@@ -1,62 +1,18 @@
+// 결제 페이지
+// 장바구니에 담긴 상품들의 결제를 진행하는 화면
 import 'package:flutter/material.dart';
-import 'dart:io';
+import 'package:provider/provider.dart';
+import '../providers/cart_provider.dart';
 import '../widgets/appbar.dart';
 
-class CheckoutPage extends StatefulWidget {
-  final String name;
-  final double price;
-  final File image;
-
-  const CheckoutPage({
-    Key? key,
-    required this.name,
-    required this.price,
-    required this.image,
-  }) : super(key: key);
-
-  @override
-  State<CheckoutPage> createState() => _CheckoutPageState();
-}
-
-class _CheckoutPageState extends State<CheckoutPage> {
-  int quantity = 1;
-
-  void _incrementQuantity() {
-    setState(() {
-      quantity++;
-    });
-  }
-
-  void _decrementQuantity() {
-    if (quantity > 1) {
-      setState(() {
-        quantity--;
-      });
-    }
-  }
-
-  void _showPurchaseCompleteDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('구매가 완료되었습니다'),
-        content: const Text('감사합니다.'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-              Navigator.popUntil(context, (route) => route.isFirst);
-            },
-            child: const Text('확인'),
-          ),
-        ],
-      ),
-    );
-  }
+class CheckoutPage extends StatelessWidget {
+  const CheckoutPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // CartProvider를 통해 장바구니 상태 관리
+    final cartProvider = context.watch<CartProvider>();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: const PageAppBar(),
@@ -66,89 +22,76 @@ class _CheckoutPageState extends State<CheckoutPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 상품 정보
-              Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.file(
-                      widget.image,
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.name,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '${widget.price.toStringAsFixed(0)}원',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              // 주문 상품 목록 섹션
+              const Text(
+                '주문 상품',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const SizedBox(height: 24),
-
-              // 수량 조절
+              const SizedBox(height: 16),
+              // 장바구니에 있는 모든 상품을 카드 형태로 표시
+              ...cartProvider.items.values
+                  .map((item) => Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          // 상품 이미지
+                          leading: Image.asset(
+                            item.product.image,
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                          ),
+                          // 상품명
+                          title: Text(item.product.name),
+                          // 수량
+                          subtitle: Text('${item.quantity}개'),
+                          // 상품 가격 x 수량
+                          trailing:
+                              Text('${item.product.price * item.quantity}원'),
+                        ),
+                      ))
+                  .toList(),
+              // 구분선
+              const Divider(height: 32),
+              // 총 결제금액 표시
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    '수량',
+                    '총 결제금액',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: _decrementQuantity,
-                        icon: const Icon(Icons.remove),
-                      ),
-                      Text(
-                        quantity.toString(),
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      IconButton(
-                        onPressed: _incrementQuantity,
-                        icon: const Icon(Icons.add),
-                      ),
-                    ],
+                  Text(
+                    '${cartProvider.totalAmount}원',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
-
-              // 결제 방법
+              const SizedBox(height: 32),
+              // 결제 수단 선택 섹션
               const Text(
-                '결제 방법',
+                '결제 수단',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
+              // 결제 수단 선택 UI
               Container(
+                width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
+                  border: Border.all(color: Colors.grey.shade300),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Row(
@@ -159,130 +102,80 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-
-              // 환불 정책
+              const SizedBox(height: 32),
+              // 환불 정책 섹션
               const Text(
                 '환불 정책',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
+              // 환불 정책 내용
               Container(
+                width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
+                  border: Border.all(color: Colors.grey.shade300),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Row(
-                  children: [
-                    Text(
-                      '상품 수령 후 7일 이내에 환불이 가능합니다.\n단순 변심의 경우 왕복 배송비가 발생할 수 있습니다.',
-                      style: TextStyle(fontSize: 14),
-                    ),
-                  ],
+                child: const Text(
+                  '상품 수령 후 7일 이내에 환불이 가능합니다.\n미개봉 상품에 한해 전액 환불됩니다.',
+                  style: TextStyle(height: 1.5),
                 ),
               ),
-              const SizedBox(height: 24),
-
-              // 추가 정보
+              const SizedBox(height: 32),
+              // 추가 정보 섹션
               const Text(
                 '추가 정보',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
+              // 배송 시 참고사항 입력 필드
               Container(
+                width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
+                  border: Border.all(color: Colors.grey.shade300),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '• 배송은 결제 완료 후 1-2일 내에 시작됩니다.',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            '• 상품은 안전하게 포장되어 배송됩니다.',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ],
+                child: const TextField(
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: '배송 시 참고사항을 입력해주세요.',
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              // 결제하기 버튼
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // 결제 처리 로직
+                    cartProvider.clearCart();
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('결제가 완료되었습니다.'),
+                        duration: Duration(seconds: 2),
                       ),
-                    ),
-                  ],
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: const Text('결제하기'),
                 ),
               ),
             ],
           ),
-        ),
-      ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              // ignore: deprecated_member_use
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: const Offset(0, -1),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '총 결제금액',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  Text(
-                    '${(widget.price * quantity).toStringAsFixed(0)}원',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ElevatedButton(
-              onPressed: _showPurchaseCompleteDialog,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
-                ),
-              ),
-              child: const Text(
-                '구매하기',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );

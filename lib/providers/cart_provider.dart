@@ -1,63 +1,73 @@
 import 'package:flutter/foundation.dart';
-import 'dart:io';
 import '../models/product.dart';
 
 class CartItem {
-  final String id;
-  final String name;
-  final int price;
-  final File image;
+  final Product product;
   int quantity;
 
   CartItem({
-    required this.id,
-    required this.name,
-    required this.price,
-    required this.image,
+    required this.product,
     this.quantity = 1,
   });
 }
 
 class CartProvider with ChangeNotifier {
-  final List<CartItem> _items = [];
+  final Map<String, CartItem> _items = {};
 
-  List<CartItem> get items => [..._items];
+  Map<String, CartItem> get items => {..._items};
 
-  int get totalAmount {
-    return _items.fold(0, (sum, item) => sum + (item.price * item.quantity));
+  int get itemCount => _items.length;
+
+  double get totalAmount {
+    var total = 0.0;
+    _items.forEach((key, cartItem) {
+      total += cartItem.product.price * cartItem.quantity;
+    });
+    return total;
   }
 
   void addItem(Product product) {
-    final existingIndex = _items.indexWhere((item) => item.id == product.id);
-    if (existingIndex >= 0) {
-      _items[existingIndex].quantity++;
-    } else {
-      _items.add(
-        CartItem(
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          image: product.image,
+    if (_items.containsKey(product.id)) {
+      _items.update(
+        product.id,
+        (existingCartItem) => CartItem(
+          product: existingCartItem.product,
+          quantity: existingCartItem.quantity + 1,
         ),
+      );
+    } else {
+      _items.putIfAbsent(
+        product.id,
+        () => CartItem(product: product),
       );
     }
     notifyListeners();
   }
 
-  void removeItem(String id) {
-    _items.removeWhere((item) => item.id == id);
+  void removeItem(String productId) {
+    _items.remove(productId);
     notifyListeners();
   }
 
-  void updateQuantity(String id, int quantity) {
-    final index = _items.indexWhere((item) => item.id == id);
-    if (index >= 0) {
-      _items[index].quantity = quantity;
+  void updateQuantity(String productId, int quantity) {
+    if (_items.containsKey(productId)) {
+      _items.update(
+        productId,
+        (existingCartItem) => CartItem(
+          product: existingCartItem.product,
+          quantity: quantity,
+        ),
+      );
       notifyListeners();
     }
   }
 
   void clear() {
+    _items.clear();
+    notifyListeners();
+  }
+
+  void clearCart() {
     _items.clear();
     notifyListeners();
   }
