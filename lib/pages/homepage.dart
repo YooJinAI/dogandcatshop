@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../widgets/category.dart';
-import '../utilities/categoryutils.dart';
 import '../widgets/home_appbar.dart';
 import '../providers/product_provider.dart';
+import '../utilities/categoryutils.dart';
 import '../models/product.dart';
+import '../widgets/home/category_list.dart';
+import '../widgets/home/product_grid.dart';
 import 'upload.dart';
-import 'productdetail.dart';
 import 'cart.dart';
 
 class HomePage extends StatefulWidget {
@@ -99,184 +99,15 @@ class _HomePageState extends State<HomePage> {
 
             return Column(
               children: [
-                // 카테고리 선택 영역
-                Container(
-                  height: 120,
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: CategoryUtils.categories.map((category) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: CategoryButton(
-                            title: category,
-                            isSelected: selectedCategory == category,
-                            onTap: () => handleCategoryTap(category),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
+                CategoryList(
+                  selectedCategory: selectedCategory,
+                  onCategoryTap: handleCategoryTap,
                 ),
-                // 상품 목록 그리드
                 Expanded(
-                  child: filteredProducts.isEmpty
-                      ? const Center(
-                          child: Text('등록된 상품이 없습니다.'),
-                        )
-                      : GridView.builder(
-                          padding: const EdgeInsets.all(16),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.65,
-                            mainAxisSpacing: 16,
-                            crossAxisSpacing: 16,
-                          ),
-                          itemCount: filteredProducts.length,
-                          itemBuilder: (context, index) {
-                            final product = filteredProducts[index];
-                            return Card(
-                              elevation: 2,
-                              child: InkWell(
-                                onTap: () {
-                                  // 상품 상세 페이지로 이동
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ProductDetailPage(
-                                        id: product.id,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Stack(
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        // 상품 이미지
-                                        Expanded(
-                                          child: Container(
-                                            width: double.infinity,
-                                            decoration: BoxDecoration(
-                                              color: Colors.grey[200],
-                                              borderRadius:
-                                                  const BorderRadius.vertical(
-                                                top: Radius.circular(4),
-                                              ),
-                                            ),
-                                            child: Image.asset(
-                                              product.image,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                        ),
-                                        // 상품 정보 (이름, 가격, 카테고리)
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: SingleChildScrollView(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  product.name,
-                                                  style: const TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                                const SizedBox(height: 4),
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Text(
-                                                      '${product.price.toStringAsFixed(0)}원',
-                                                      style: const TextStyle(
-                                                        fontSize: 12,
-                                                        color: Colors.green,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      product.category,
-                                                      style: TextStyle(
-                                                        fontSize: 11,
-                                                        color: Colors.grey[600],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    // 상품 삭제 버튼
-                                    Positioned(
-                                      top: 4,
-                                      right: 4,
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          // 삭제 확인 다이얼로그 표시
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) => AlertDialog(
-                                              title: const Text('상품 삭제'),
-                                              content:
-                                                  const Text('이 상품을 삭제하시겠습니까?'),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                  child: const Text('취소'),
-                                                ),
-                                                TextButton(
-                                                  onPressed: () {
-                                                    productProvider
-                                                        .removeProduct(
-                                                            product.id);
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                  child: const Text('삭제'),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.all(4),
-                                          decoration: BoxDecoration(
-                                            color:
-                                                Colors.black.withOpacity(0.5),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const Icon(
-                                            Icons.close,
-                                            color: Colors.white,
-                                            size: 16,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                  child: ProductGrid(
+                    products: filteredProducts,
+                    onDeleteProduct: productProvider.removeProduct,
+                  ),
                 ),
               ],
             );
@@ -291,7 +122,7 @@ class _HomePageState extends State<HomePage> {
           );
         },
         backgroundColor: Colors.green,
-        child: const Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.add),
       ),
     );
   }

@@ -1,38 +1,25 @@
 import 'package:flutter/foundation.dart';
 import '../models/product.dart';
-
-class CartItem {
-  final Product product;
-  int quantity;
-
-  CartItem({
-    required this.product,
-    this.quantity = 1,
-  });
-}
+import '../models/cart_item.dart';
 
 class CartProvider with ChangeNotifier {
   final Map<String, CartItem> _items = {};
 
   Map<String, CartItem> get items => {..._items};
 
+  List<CartItem> get itemsList => _items.values.toList();
+
   int get itemCount => _items.length;
 
-  double get totalAmount {
-    var total = 0.0;
-    _items.forEach((key, cartItem) {
-      total += cartItem.product.price * cartItem.quantity;
-    });
-    return total;
-  }
+  double get total => _items.values.fold(0, (sum, item) => sum + item.total);
 
   void addItem(Product product) {
     if (_items.containsKey(product.id)) {
       _items.update(
         product.id,
-        (existingCartItem) => CartItem(
-          product: existingCartItem.product,
-          quantity: existingCartItem.quantity + 1,
+        (existingItem) => CartItem(
+          product: existingItem.product,
+          quantity: existingItem.quantity + 1,
         ),
       );
     } else {
@@ -53,18 +40,13 @@ class CartProvider with ChangeNotifier {
     if (_items.containsKey(productId)) {
       _items.update(
         productId,
-        (existingCartItem) => CartItem(
-          product: existingCartItem.product,
+        (existingItem) => CartItem(
+          product: existingItem.product,
           quantity: quantity,
         ),
       );
       notifyListeners();
     }
-  }
-
-  void clear() {
-    _items.clear();
-    notifyListeners();
   }
 
   void clearCart() {

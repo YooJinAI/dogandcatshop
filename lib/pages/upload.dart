@@ -9,6 +9,7 @@ import '../models/product.dart';
 import '../providers/product_provider.dart';
 import '../widgets/appbar.dart';
 import '../utilities/custom_text_field.dart';
+import '../widgets/upload/image_picker_widget.dart';
 
 class UploadPage extends StatefulWidget {
   const UploadPage({super.key});
@@ -65,6 +66,10 @@ class _UploadPageState extends State<UploadPage> {
       // 상품 추가
       provider.addProduct(product);
       Navigator.pop(context);
+    } else if (_image == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('이미지를 선택해주세요')),
+      );
     }
   }
 
@@ -81,32 +86,9 @@ class _UploadPageState extends State<UploadPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 이미지 선택 영역
-                Center(
-                  child: GestureDetector(
-                    onTap: _pickImage,
-                    child: Container(
-                      width: 200,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: _image != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.file(
-                                _image!,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : const Icon(
-                              Icons.add_photo_alternate,
-                              size: 50,
-                              color: Colors.grey,
-                            ),
-                    ),
-                  ),
+                ImagePickerWidget(
+                  image: _image,
+                  onTap: _pickImage,
                 ),
                 const SizedBox(height: 16),
                 // 상품명 입력 필드
@@ -172,7 +154,8 @@ class _UploadPageState extends State<UploadPage> {
                     onPressed: _submitForm,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.green,
+                      backgroundColor: const Color(0xFFFEE7C5),
+                      foregroundColor: Colors.black,
                     ),
                     child: const Text('상품 등록'),
                   ),
