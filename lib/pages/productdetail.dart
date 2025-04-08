@@ -68,7 +68,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 ),
                 // 상품 가격
                 Text(
-                  '₩${product.price}',
+                  '₩${product.price.toStringAsFixed(0)}',
                   style: const TextStyle(
                     fontSize: 18,
                     color: Colors.green,
@@ -178,7 +178,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       onPressed: () {
                         final cartProvider =
                             Provider.of<CartProvider>(context, listen: false);
+                        // 장바구니 비우고 현재 상품만 담기
+                        cartProvider.clearCart();
                         cartProvider.addItem(product);
+
+                        // 결제 페이지로 이동
                         Navigator.push(
                           context,
                           MaterialPageRoute(
